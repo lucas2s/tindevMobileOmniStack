@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-community/async-storage'
 import { SafeAreaView, View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 
@@ -7,17 +7,18 @@ import logo from '../assets/logo.png';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 
-export default function Main( navigation ) {
+export default function Main( { navigation }) {
     const id = navigation.getParam('user');
     const [users, setUsers] = useState ([]);
-
+    console.log("Entrei 1");
     useEffect(() => { 
         async function loadUsers () {
+            console.log("Entrei 2");
             const response = await api.get('/devs', {
-                headers: {
-                    user: id,
-                }    
+                headers: { user: id }    
             })
+            console.log("Entrei 3");
+            console.log(response.data);
             setUsers(response.data);
         }
         loadUsers();
@@ -52,25 +53,25 @@ export default function Main( navigation ) {
                 <Image source={logo} />
             </TouchableOpacity>
             <View style={styles.cardsContainer}>
-                { user.lenght === 0 
+                { users.length === 0 
                 ? <Text style={styles.empty}> Acabou :( </Text>
-                :   ( users.map(user => (
-                        <View key={user._id} style={[styles.card, {zIndex: users.lenght - index}]} >
+                :   ( users.map((user, index) => (
+                        <View key={user._id} style={[styles.card, { zIndex: users.length - index}]} >
                             <Image style={styles.avatar} source={{ uri: user.avatar}} />
                             <View style={styles.footer}>
-                                <Text style={styles.name}>user.name</Text>
-                                <Text style={styles.bio} numberOfLines={3}>user.bio</Text>
+                                <Text style={styles.name}>{ user.name }</Text>
+                                <Text style={styles.bio} numberOfLines={3}>{ user.bio }</Text>
                             </View>
                         </View>
                     ))
                 )}
             </View>
-            { user.lenght > 0 && (
-                <View style={style.buttonsContainer}>
-                    <TouchableOpacity style={style.button} onPress={handleDislike}>
+            { users.length > 0 && (
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleDislike}>
                         <Image source={dislike} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={style.button} onPress={handleLike}>
+                    <TouchableOpacity style={styles.button} onPress={handleLike}>
                         <Image source={like} />
                     </TouchableOpacity>
                 </View>
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     cardsContainer: {
         flex: 1,
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333'
+        color: '#333',
     },
 
     bio: {
@@ -129,6 +130,7 @@ const styles = StyleSheet.create({
     logo: {
         marginTop: 30,
     },
+
     buttonsContainer: {
         flexDirection: 'row',
         marginBottom: 30,
@@ -150,10 +152,11 @@ const styles = StyleSheet.create({
             height: 2,
         },
     },
+
     empty: {
         alignSelf: "center",
         color: '#999',
         fontSize: 24,
         fontWeight: 'bold',
-    }
+    },
 });
